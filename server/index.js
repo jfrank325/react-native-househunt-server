@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const houses = require('./routes/houses');
 const app = express();
-
+const cors = require('cors');
 app.use(express.json());
 require('dotenv').config();
 
@@ -10,8 +10,15 @@ app.get('/', (req, res) => {
   res.send('Welcome to the house listings api');
 });
 
+const redirectToHTTPS = require('express-http-to-https').redirectToHTTPS;
+app.use(redirectToHTTPS([/localhost:(\d{4})/], [/\/insecure/], 301));
+app.use(cors());
+app.all('/', function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
+  next();
+});
 app.use('/api/houses', houses);
-
 const port = process.env.PORT || 3000;
 mongoose
   .connect(process.env.MONGO_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
